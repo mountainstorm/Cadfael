@@ -1,0 +1,4 @@
+sphinx
+pymongo >= 3.0.2
+python-magic
+macholib

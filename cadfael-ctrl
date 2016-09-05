@@ -1,0 +1,20 @@
+#!/usr/bin/python
+# coding: utf-8
+# pylint: disable=W0621,C0103,R0903
+from cadfael.conf import argument_parser
+from cadfael.modules.inode import import_tree
+from cadfael.core.utils import create_volume
+
+
+if __name__ == '__main__':
+    parser = argument_parser('desc')
+    parser.add_argument(
+        'volname', help='volume name to use'
+    )
+    parser.add_argument(
+        'top', help='dir to import'
+    )
+    args = parser.parse_args()
+
+    create_volume(args.volname)
+    import_tree(args.volname, args.top)

@@ -1,0 +1,3 @@
+cadfael.egg-info/*
+*.pyc
+db/*
