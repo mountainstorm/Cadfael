@@ -8,3 +8,4 @@ Requirements
 ------------
 
 * libmagic: brew install libmagic
+

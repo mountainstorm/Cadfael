@@ -9,6 +9,8 @@ import hashlib
 from datetime import datetime
 import multiprocessing
 import magic
+from ctypes import *
+from ctypes.util import find_library
 
 import cadfael.core.signals
 from cadfael.conf import settings
@@ -149,6 +151,7 @@ def get_base_inode(volume_name, path):
         'ctime': datetime.utcfromtimestamp(st.st_ctime),
         'chmod': get_chmod(tpe, stat.S_IMODE(st.st_mode)),
         'chflags': get_chflags(st.st_flags),
+        'acl': get_acl(path),
         'details': {}
     }
 
@@ -203,3 +206,31 @@ def get_chflags(flags):
     if flags & stat.UF_HIDDEN != 0:
         retval.append('hidden')
     return retval
+
+
+def get_acl(path):
+    retval = None
+    libc = cdll.LoadLibrary(find_library('c'))
+
+    # from <sys/acl.h>
+    ACL_TYPE_EXTENDED = 0x00000100
+
+    acl_get_file = libc.acl_get_file
+    acl_get_file.argtypes = [c_char_p, c_int]
+    acl_get_file.restype = c_void_p
+
+    acl_to_text = libc.acl_to_text
+    acl_to_text.argtypes = [c_void_p, POINTER(c_ssize_t)]
+    acl_to_text.restype = c_char_p
+
+    acl_free = libc.acl_free
+    acl_free.argtypes = [c_void_p]
+    acl_free.restype = c_int
+
+    acl = acl_get_file(path, ACL_TYPE_EXTENDED)
+    if acl:
+        retval = acl_to_text(acl, None)
+        acl_free(acl)
+    return retval
+
+
